@@ -7,9 +7,9 @@ def screen(theme):
 	app = [
 		[psg.Input(key='inputBar', pad=(5,5), font=['10']), psg.Spin(convMethod, key='convWheel', pad=(5,5), font=['20'], size=(10,10))],
 		[psg.Button("Submit", key='submit', expand_x=True, pad=(5,5), size=(6,3)), psg.Button("Exit", key='exit', pad=(5,5), size=(6,3))],
-		[psg.Frame('',outputFrame, expand_x=True, pad=(5,5), right_click_menu=themeMenu)]
+		[psg.Frame('',outputFrame, expand_x=True, pad=(5,5))]
 	]
-	return psg.Window("Convertor", app)
+	return psg.Window("Convertor", app, right_click_menu=themeMenu)
 
 
 themeMenu = ['theme',['BlueMono','Dark','DarkBrown3']]

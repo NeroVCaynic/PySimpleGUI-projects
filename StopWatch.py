@@ -1,38 +1,51 @@
 import PySimpleGUI as sg
+from time import time
 
 def Watch(theme):
 	sg.theme(theme)
+	themeMenu = ['theme',['Black','Dark']]
 	box = [
-		[sg.Button('T', size=(2,1), key='Theme')],
-		[sg.Text(0, key='timer', expand_x=True, justification='center', font='cursive 45', pad=(30,30))],
-		[sg.Button('Start', size=(10,3), pad=(4,4), key='start'), sg.Button('Reset', size=(10,3), pad=(4,4), key='reset')]
+		[sg.Push(), sg.Button('X', key='exit', size=(1,0), pad=(0,0), button_color=('#FFFFFF','#FF0000'), border_width=0)],
+		[sg.VPush()],
+		[sg.Text(0, key='timer', expand_x=True, justification='center', font='Young 45', pad=(10,10))],
+		[sg.Button('Start', size=(10,3), pad=(4,4), key='startStop', button_color=('#FFFFFF','#FF0000'), border_width=0), 
+		sg.Button('Reset', size=(10,3), pad=(4,4), key='reset', button_color=('#FFFFFF','#FF0000'), border_width=0)],
+		[sg.VPush()]
 	]
-	return sg.Window('Stop Watch', box)
+	return sg.Window('Stop Watch', box, size=(300,300), no_titlebar=True, element_justification='center', right_click_menu=themeMenu)
 
-window = Watch('LightGrey')
-curColor = 'LightGrey'
+window = Watch('Black')
+themeMenu = ['theme',['Black','Dark']]
+startTime = 0
+active = False
 
 while True:
-	events, values = window.read()
+	events, values = window.read(timeout=10)
 
-	if events == 'Theme':
-		if curColor == 'LightGrey':
-			window.close()
-			curColor = 'Dark'
-			window = Watch('Dark')
+	if events in themeMenu[1]:
+		window.close()
+		window = Watch(events)
+		continue
+
+	if events == 'startStop':
+		if active:
+			active = False
+			window['startStop'].update('Start')
 		else:
-			if curColor == 'Dark':
-				window.close()
-				curColor = 'LightGrey'
-				window = Watch('LightGrey')				
+			startTime = time()
+			active = True
+			window['startStop'].update('Stop')
 
-	if events == 'start':
-		window['timer'].update()
+	if active:
+		elapsedTime = round(time() - startTime, 1)
+		window['timer'].update(elapsedTime)
 
 	if events == 'reset':
+		startTime = 0
 		window['timer'].update(0)
+		active = False
 
-	if events == sg.WIN_CLOSED:
+	if events in (sg.WIN_CLOSED, 'exit'):
 		break
 
 
