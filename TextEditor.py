@@ -1,13 +1,17 @@
 import PySimpleGUI as sg
 
-def editor(theme):
-	setup = [
-		[],
-	]
+menubox = [
+	['File', ['Open','Save']],
+	['Edit', ['Word Count']]
+]
 
-	return sg.Window('Text Editor', setup)
+setup = [
+	[sg.Menu(menubox, key='-menu-')],
+	[sg.Text('Untitled', key='txtname')],
+	[sg.Multiline(no_scrollbar = True, key='-textbox-', size=(80,40))]
+]
 
-window = editor('LightGrey')
+window = sg.Window('Text Editor', setup)
 
 while True:
 
