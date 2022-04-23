@@ -51,8 +51,11 @@ while True:
 	if events == 'enter':
 		L = ''.join(outputL)
 		R = ''.join(outputR)
-		output =  L + " " + operator + " " + R 
-		window['outputBox'].update(eval(output))
+		output =  L + " " + operator + " " + R
+		try:
+			window['outputBox'].update(eval(output))
+		except SyntaxError:
+			pass
 
 	if events == sg.WIN_CLOSED:
 		break
