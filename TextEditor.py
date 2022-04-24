@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 from pathlib import Path
+import os
 
 menubox = [
 	['File', ['Open','Save']],
@@ -28,8 +29,9 @@ while True:
 	if events == 'Save':
 		filePath = sg.popup_get_file('Save as', no_window=True, save_as=True)
 		file = Path(filePath)
-		file.write_text(values['-txtbox-'])
-		window['-txtname-'].update(filePath.split('/')[-1])
+		if os.path.isfile(filePath) == True:
+			file.write_text(values['-txtbox-'])
+			window['-txtname-'].update(filePath.split('/')[-1])
 
 	if events == sg.WIN_CLOSED:
 		break
