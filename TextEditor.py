@@ -5,7 +5,7 @@ from re import search
 
 menubox = [
 	['File', ['Open','Save']],
-	['Edit', ['Word Count', 'Delete']]
+	['Edit', ['Word Count', 'Duplicate Text']]
 ]
 
 txtmenu = ['emotes',['(｡◕‿‿◕｡)','(╥﹏╥)','(̿▀̿ ̿Ĺ̯̿̿▀̿ ̿)̄','༼ つ ◕_◕ ༽つ','୧༼ಠ益ಠ╭∩╮༽','(ㆆ _ ㆆ)']]
@@ -44,15 +44,18 @@ while True:
 		words = values['-txtbox-'].replace('\n', ' ').split(' ')
 		for count, value in enumerate(''.join(words)):
 			counts = count
-		sg.Popup(f'The total words are {counts+1}')
+		try:
+			sg.Popup(f'The total words are {counts+1}')
+		except NameError:
+			pass
 
 
-	if events == 'Delete':
+	if events == 'Duplicate Text':
+		txt = values['-txtbox-']
 		try:
 			selection = window['-txtbox-'].Widget.selection_get()
-			txt = values['-txtbox-'].replace('\n', ' ').split(' ')
-			ind = txt.index(selection)
-			txt.pop(ind)
+			newTxt = txt + " " + selection
+			window['-txtbox-'].update(newTxt)
 		except:
 			pass
 
