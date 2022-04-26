@@ -1,19 +1,15 @@
 import PySimpleGUI as sg
 import PIL as pl
+from io import BytesIO
 from pathlib import Path
-import os
-from re import search
 
 filePath = sg.popup_get_file('Open', no_window=True)
-if filePath:
-	file = Path(filePath)
-	if os.path.isfile(filePath) == True:
-		imageCol = sg.Column([[sg.Image(filePath, key='-image-')]])
 
 comandCol = sg.Column([[sg.Slider(key='-blur-', orientation='h')],
 		[sg.Slider(key='-brightness-', orientation='h')]
 		]
 	)
+imageCol = sg.Column([[sg.Image(filePath, key='-image-')]])
 
 layout = [
 	[comandCol, imageCol],
