@@ -38,21 +38,30 @@ while True:
 				window['-views-'].update(linkGot.views)
 				window['-author-'].update(linkGot.author)
 				window['-desc-'].update(linkGot.description)
-				window['-HQ-'].update(f'{round(linkGot.streams.get_highest_resolution().filesize / 1048576,1)} MB')
-				window['-LQ-'].update(f'{round(video_object.streams.get_lowest_resolution().filesize / 1048576,1)} MB')
-				window['-AQ-'].update(f'{round(video_object.streams.get_audio_only().filesize / 1048576,1)} MB')
+				window['-HQ-'].update(f'{round(linkGot.streams.get_highest_resolution().filesize / 1048576,1)} MB, {linkGot.streams.get_highest_resolution().resolution}')
+				window['-LQ-'].update(f'{round(linkGot.streams.get_lowest_resolution().filesize / 1048576,1)} MB, {linkGot.streams.get_lowest_resolution().resolution}')
+				window['-AQ-'].update(f'{round(linkGot.streams.get_audio_only().filesize / 1048576,1)} MB')
 				
 		else:
 			sg.Popup('invalid URL')
 
+	try:
 		if events == '-highQ-':
-			linkGot.streams.get_highest_resolution().download()
+			if valid==True:
+				filePath = sg.popup_get_folder('Save To', no_window=True)
+				linkGot.streams.get_highest_resolution().download(filePath)
 
 		if events == '-lowQ-':
-			linkGot.streams.get_lowest_resolution().download()
+			if valid==True:
+				filePath = sg.popup_get_folder('Save To', no_window=True)
+				linkGot.streams.get_lowest_resolution().download(filePath)
 
 		if events == '-audio-':
-			linkGot.streams.get_audio_only().download()
+			if valid==True:
+				filePath = sg.popup_get_folder('Save To', no_window=True)
+				linkGot.streams.get_audio_only().download(filePath)
+	except NameError:
+		pass
 
 	if events == sg.WIN_CLOSED:
 		break
