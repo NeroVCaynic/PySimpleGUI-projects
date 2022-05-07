@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+import os
 from pathlib import Path as path
 import pandas as pd
 import matplotlib as plt
@@ -19,8 +20,10 @@ def cWindow(theme='LightGrey'):
 		['Themes', ['Dark','Blue','LightGrey']]
 	]
 
-	Tab1 = sg.Tab('View', [[sg.Text('Text', key='-TEXT-')],
-		[sg.Button('Button', key='-BUTTON-')]
+	Tab1 = sg.Tab('View', [[sg.Text('', key='-TABLETEXT-')],
+		[sg.Button('Button', key='-BUTTON-')],
+		[sg.Frame('Data Table', [[sg.Table(values=[[1,'a',True],[2,'b',False],[3,'c',True]], headings=['int','string','boolean'], 
+			key='-TABLECONTENT-', auto_size_columns=True, expand_x = True, expand_y = True, justification = "left",)]], expand_x = True, expand_y = True)]
 	])
 	
 	Tab2 = sg.Tab('Data', [[sg.Checkbox('1', key='-1-'), sg.Checkbox('2', key='-2-'), sg.Checkbox('3', key='-3-')],
@@ -48,7 +51,15 @@ while True:
 		pass
 
 	if events == 'Open':
-		sg.popup_get_file('Open', no_window=True)
+		filePath = sg.popup_get_file('Open', no_window=True)
+		if filePath:
+			if os.path.isfile(filePath) == True:
+				extension = filePath.split('/')[-1]
+				if extention.split('.')[-1] in ['xlsx', 'xml', 'csv', 'xls', 'json'] == True:
+					window['-TABLETITLE-'].update()
+					window['-TABLECONTENT-'].update()
+				else:
+					sg.Popup("Wrong File")
 
 	if events == 'Save as':
 		sg.popup_get_file('Save As', save_as=True, no_window=True)
