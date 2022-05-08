@@ -13,11 +13,11 @@ def update_figure(data):
 	figure_canvas_agg.draw()
 	figure_canvas_agg.get_tk_widget().pack()
 
-def cWindow(theme='LightGrey'):
+def cWindow(theme='LightGrey1'):
 	sg.theme(theme)
 
 	Menu = [['File', ['Open','Save as','Exit']],
-		['Themes', ['Dark','Blue','LightGrey']]
+		['Themes', ['DarkGrey9','DarkGreen6','LightGrey1']]
 	]
 
 	heading = ['int','string','boolean']
@@ -68,7 +68,7 @@ while True:
 	if events == 'Save as':
 		sg.popup_get_file('Save As', save_as=True, no_window=True)
 
-	if events in ['Dark','Blue','LightGrey']:
+	if events in ['DarkGrey9','DarkGreen6','LightGrey1']:
 		window.close()
 		window = cWindow(events)
 
