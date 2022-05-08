@@ -20,14 +20,18 @@ def cWindow(theme='LightGrey'):
 		['Themes', ['Dark','Blue','LightGrey']]
 	]
 
-	Tab1 = sg.Tab('View', [[sg.Text('', key='-TABLETEXT-')],
-		[sg.Button('Button', key='-BUTTON-')],
-		[sg.Frame('Data Table', [[sg.Table(values=[[1,'a',True],[2,'b',False],[3,'c',True]], headings=['int','string','boolean'], 
+	heading = ['int','string','boolean']
+	content = [[1,'a',True],[2,'b',False],[3,'c',True]]
+
+	Tab1 = sg.Tab('View', [[sg.Frame('New Entry', [[sg.Input(key='-TABLEINPUT-', expand_x = True), sg.Spin(heading, expand_x=True)],
+		[sg.Button('Submit', key='-TABLESUBMIT-')]], expand_x = True)],
+		[sg.Frame('Data Table', [[sg.Table(values=content, headings=heading, 
 			key='-TABLECONTENT-', auto_size_columns=True, expand_x = True, expand_y = True, justification = "left",)]], expand_x = True, expand_y = True)]
 	])
 	
-	Tab2 = sg.Tab('Data', [[sg.Checkbox('1', key='-1-'), sg.Checkbox('2', key='-2-'), sg.Checkbox('3', key='-3-')],
-		[sg.Frame('Data Visualization', [[sg.Canvas(size=(400,400), key='-CHART-')]])]
+	Tab2 = sg.Tab('Data', [[sg.Frame('Data Form', [[sg.Spin(heading, key='-DATAHEADx-', expand_x = True), sg.Spin(heading, key='-DATAHEADy-', expand_x = True), sg.Spin(['Plot', 'Pie', 'Bar'],
+	 expand_x = True)], [sg.Button('Submit', key='-DATASUBMIT-')]], expand_x = True)],
+		[sg.Frame('Data Visualization', [[sg.Canvas(size=(400,400), key='-DATACHART-')]])]
 	])
 	
 	layout = [[sg.Menu(Menu, key='-MENU-')],
@@ -40,7 +44,7 @@ window = cWindow()
 
 fig = plt.figure.Figure(figsize = (5,4))
 fig.add_subplot(111).plot([],[])
-figure_canvas_agg = FigureCanvasTkAgg(fig,window['-CHART-'].TKCanvas)
+figure_canvas_agg = FigureCanvasTkAgg(fig,window['-DATACHART-'].TKCanvas)
 figure_canvas_agg.draw()
 figure_canvas_agg.get_tk_widget().pack()
 
