@@ -5,6 +5,10 @@ import pandas as pd
 import matplotlib as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+def csvConvert(filePath):
+	csv = pd.read_csv(filePath)
+	return csv
+
 def update_figure():
 	axes = fig.axes
 	x = [100, 200, 300, 400]
@@ -32,14 +36,11 @@ def cWindow(theme='LightGrey1'):
 	content = [[1,'a',True],[2,'b',False],[3,'c',True]]
 
 	Tab1 = sg.Tab('View', [[sg.Frame('New Entry', [[sg.Input(key='-TABLEINPUT-', expand_x = True), sg.Spin(heading, expand_x=True)],
-		[sg.Button('Submit', key='-TABLESUBMIT-')]], expand_x = True)],
-		[sg.Frame('Data Table', [[sg.Table(values=content, headings=heading, 
-			key='-TABLECONTENT-', auto_size_columns=True, expand_x = True, expand_y = True, justification = "left",)]], expand_x = True, expand_y = True)]
-	])
+		[sg.Button('Submit', key='-TABLESUBMIT-')]], expand_x = True)], 
+		[sg.Frame('Data Table', [[]], expand_x = True, expand_y = True, key='-TABLE-')]], key='-TAB1-')
 	
-	Tab2 = sg.Tab('Data', [[sg.Frame('Data Form', [[sg.Spin(heading, key='-DATAHEADx-', expand_x = True), sg.Spin(heading, key='-DATAHEADy-', expand_x = True), 
-		sg.Spin(['Plot', 'Pie', 'Bar'],
-	 expand_x = True)], [sg.Button('Submit', key='-DATASUBMIT-')]], expand_x = True)],
+	Tab2 = sg.Tab('Data', [[sg.Frame('Data Form', [[sg.Spin(heading, key='-DATAHEADx-', expand_x = True), sg.Spin(heading, key='-DATAHEADy-', expand_x = True)],
+	 [sg.Button('Submit', key='-DATASUBMIT-')]], expand_x = True)],
 		[sg.Frame('Data Visualization', [[sg.Canvas(size=(400,400), key='-DATACHART-')]])]
 	])
 	
@@ -62,14 +63,17 @@ while True:
 	if events == 'Open':
 		filePath = sg.popup_get_file('Open', no_window=True)
 		if filePath:
+			print(filePath)
 			if os.path.isfile(filePath) == True:
 				extension = filePath.split('/')[-1]
-				if extention.split('.')[-1] in ['xlsx', 'xml', 'csv', 'xls', 'json'] == True:
-					window['-TABLETITLE-'].update()
-					window['-TABLECONTENT-'].update()
+				if 'xlsx xml csv xls json'.find(extension.split('.')[-1]) >= 0:
+					df = pd.DataFrame(csvConvert(filePath))
+					window.extend_layout(window['-TABLE-'], [[sg.Table(values=[], headings=[item for item in df], key='-TABLECONTENT-',
+						auto_size_columns=True, expand_x = True, expand_y = True, justification = "left")]])			
 				else:
 					sg.Popup("Wrong File")
-
+			else:
+				sg.Popup("Wrong File")
 	if events == 'Save as':
 		sg.popup_get_file('Save As', save_as=True, no_window=True)
 
