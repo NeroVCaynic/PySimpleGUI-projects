@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 import os
 from pathlib import Path as path
 import pandas as pd
+import json
 import matplotlib as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -50,7 +51,12 @@ def cWindow(theme='LightGrey1'):
 
 	return sg.Window('Data Chart', layout, finalize=True)
 
-window = cWindow()
+try:
+	with open('Theme/Theme_Saves.json', 'r') as theme:
+		themeLoad = json.load(theme)
+	window = cWindow(themeLoad['Theme'])
+except FileNotFoundError:
+	window = cWindow()
 
 create_plot()
 
@@ -63,13 +69,19 @@ while True:
 	if events == 'Open':
 		filePath = sg.popup_get_file('Open', no_window=True)
 		if filePath:
-			print(filePath)
 			if os.path.isfile(filePath) == True:
 				extension = filePath.split('/')[-1]
 				if 'xlsx xml csv xls json'.find(extension.split('.')[-1]) >= 0:
 					df = pd.DataFrame(csvConvert(filePath))
+					newList = []
+					for item in df.values.tolist():
+						newList.append(item)
+					window.close()
+					window = cWindow(themeLoad['Theme'])
+					create_plot()
 					window.extend_layout(window['-TABLE-'], [[sg.Table(values=[], headings=[item for item in df], key='-TABLECONTENT-',
-						auto_size_columns=True, expand_x = True, expand_y = True, justification = "left")]])			
+						auto_size_columns=False, expand_x = True, expand_y = True, justification = "left")]])
+					window['-TABLECONTENT-'].update(newList)
 				else:
 					sg.Popup("Wrong File")
 			else:
@@ -78,6 +90,9 @@ while True:
 		sg.popup_get_file('Save As', save_as=True, no_window=True)
 
 	if events in ['DarkGrey9','DarkGreen6','LightGrey1']:
+		themeEvent = {'Theme':events} 
+		with open('Theme/Theme_Saves.json', 'w') as theme:
+			json.dump(themeEvent, theme)
 		window.close()
 		window = cWindow(events)
 		create_plot()
