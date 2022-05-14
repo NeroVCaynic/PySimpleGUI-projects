@@ -10,23 +10,29 @@ def csvConvert(filePath):
 	csv = pd.read_csv(filePath)
 	return csv
 
-def update_figure(x, y, labelx, labely):
+def figure(x, y, labelx, labely):
 	plt.clf()
 	plt.plot(x, y)
 	plt.xlabel(labelx)
 	plt.ylabel(labely)
 	plt.grid(True)
-	return plt.gcf()
+	FigureCanvasTkAgg(plt.gcf(), window['-DATACHART-'].TKCanvas)
+	figure_canvas_agg.draw()
+	figure_canvas_agg.get_tk_widget().pack()
 
-def create_plot(fig):
-	figure_canvas_agg = FigureCanvasTkAgg(fig,window['-DATACHART-'].TKCanvas)
+def create_canvas():
+	global figure_canvas_agg
+	figure_canvas_agg = FigureCanvasTkAgg(plt.gcf(),window['-DATACHART-'].TKCanvas)
+	for item in figure_canvas_agg.get_tk_widget().find_all():
+		figure_canvas_agg.get_tk_widget().delete(item)
+	window['-DATACHART-'].TKCanvas.delete('all')
 	figure_canvas_agg.draw()
 	figure_canvas_agg.get_tk_widget().pack()
 
 def cWindow(theme='LightGrey1'):
 	sg.theme(theme)
 
-	Menu = [['File', ['Open','Save as','Exit']],
+	Menu = [['File', ['Open','Clear','Exit']],
 		['Themes', ['DarkGrey9','DarkGreen6','LightGrey1']]
 	]
 
@@ -35,7 +41,7 @@ def cWindow(theme='LightGrey1'):
 		[sg.Frame('Data Table', [[]], expand_x = True, expand_y = True, key='-TABLE-')]], key='-TAB1-')
 	
 	Tab2 = sg.Tab('Data', [[sg.Frame('Data Form', [[sg.Spin(None, key='-DATAHEADx-', size=(45)), sg.Spin(None, key='-DATAHEADy-', size=(45))],
-	 [sg.Button('Submit', key='-DATASUBMIT-')]], expand_x = True)],
+	 [sg.Button('Submit', key='-DATASUBMIT-')]], expand_x = True, key='-VISUALINPUT-', visible = False)],
 		[sg.Frame('Data Visualization', [[sg.Canvas(size=(400,400), expand_x=True, expand_y=True, key='-DATACHART-')]], expand_x=True, expand_y=True)]
 	])
 	
@@ -43,14 +49,16 @@ def cWindow(theme='LightGrey1'):
 		[sg.TabGroup([[Tab1, Tab2]])]
 	]
 
-	return sg.Window('Data Chart', layout, finalize=True)
+	return sg.Window('Data View & Visualizer', layout, icon='icon/dataic.ico', finalize=True)
 
 try:
 	with open('Theme/Theme_Saves.json', 'r') as theme:
 		themeLoad = json.load(theme)
 	window = cWindow(themeLoad['Theme'])
+	create_canvas()
 except FileNotFoundError:
 	window = cWindow()
+	create_canvas()
 
 while True:
 	events, values = window.read()
@@ -58,10 +66,19 @@ while True:
 	if events == '-TABLESUBMIT-' and values['-FIELD-'] != "":
 		if values['-TABLEINPUT-'] != "" or " ":
 			try:
-				newDF = pd.DataFrame(df.loc[df[values['-FIELD-']] == int(values['-TABLEINPUT-'])])
+				try:
+					newDF = pd.DataFrame(df.loc[df[values['-FIELD-']] == int(values['-TABLEINPUT-'])])
+				except KeyError:
+					pass
 			except ValueError:
-				newDF = pd.DataFrame(df.loc[df[values['-FIELD-']] == values['-TABLEINPUT-']])
-			sg.Popup("\n".join(map(str, newDF.values.tolist())))
+				try:
+					newDF = pd.DataFrame(df.loc[df[values['-FIELD-']] == values['-TABLEINPUT-']])
+				except KeyError:
+					pass
+			try:
+				sg.Popup("\n".join(map(str, newDF.values.tolist())))
+			except NameError:
+				pass
 
 	if events == 'Open':
 		filePath = sg.popup_get_file('Open', no_window=True)
@@ -75,7 +92,9 @@ while True:
 						newList.append(item)
 					window.close()
 					window = cWindow(themeLoad['Theme'])
+					create_canvas()
 					window['-SEARCHFRAME-'].update(visible = True)
+					window['-VISUALINPUT-'].update(visible = True)
 					window.extend_layout(window['-TABLE-'], [[sg.Table(values=[], headings=[item for item in df], key='-TABLECONTENT-',
 						auto_size_columns=False, expand_x = True, expand_y = True, justification = "left")]])
 					window['-TABLECONTENT-'].update(newList)
@@ -86,8 +105,16 @@ while True:
 					sg.Popup("Wrong File")
 			else:
 				sg.Popup("Wrong File")
-	if events == 'Save as':
-		sg.popup_get_file('Save As', save_as=True, no_window=True)
+	if events == 'Clear':
+		clear = sg.popup_yes_no("Are you sure you want to clear?")
+		if clear == 'Yes':
+			window.close()
+			try:
+				window = cWindow(themeLoad['Theme'])
+				create_canvas()
+			except FileNotFoundError:
+				window = cWindow()
+				create_canvas()
 
 	if events in ['DarkGrey9','DarkGreen6','LightGrey1']:
 		themeEvent = {'Theme':events} 
@@ -95,13 +122,13 @@ while True:
 			json.dump(themeEvent, theme)
 		window.close()
 		window = cWindow(events)
+		create_canvas()
 
 	if events == '-DATASUBMIT-':
 		try:
-			create_plot(update_figure(df[values['-DATAHEADx-']].tolist(),
-				df[values['-DATAHEADy-']].tolist(), values['-DATAHEADx-'], 
-				values['-DATAHEADy-']))
-		except Exception:
+			figure(df[values['-DATAHEADx-']].tolist(),df[values['-DATAHEADy-']].tolist(), 
+				values['-DATAHEADx-'], values['-DATAHEADy-'])
+		except KeyError:
 			sg.Popup("Invalid")
 
 	if events in [sg.WIN_CLOSED, 'Exit']:
