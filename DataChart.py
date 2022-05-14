@@ -10,7 +10,6 @@ def csvConvert(filePath):
 	csv = pd.read_csv(filePath)
 	return csv
 
-
 def update_figure(x, y, labelx, labely):
 	plt.clf()
 	plt.plot(x, y)
@@ -31,13 +30,13 @@ def cWindow(theme='LightGrey1'):
 		['Themes', ['DarkGrey9','DarkGreen6','LightGrey1']]
 	]
 
-	Tab1 = sg.Tab('View', [[sg.Frame('New Entry', [[sg.Input(key='-TABLEINPUT-', expand_x = True), sg.Spin([], expand_x=True, key='-FIELD-')],
-		[sg.Button('Submit', key='-TABLESUBMIT-')]], expand_x = True)], 
+	Tab1 = sg.Tab('View', [[sg.Frame('Search Entry', [[sg.Input(key='-TABLEINPUT-', expand_x = True), sg.Spin(None, size=(25), key='-FIELD-')],
+		[sg.Button('Submit', key='-TABLESUBMIT-')]], expand_x = True, key='-SEARCHFRAME-', visible = False)], 
 		[sg.Frame('Data Table', [[]], expand_x = True, expand_y = True, key='-TABLE-')]], key='-TAB1-')
 	
-	Tab2 = sg.Tab('Data', [[sg.Frame('Data Form', [[sg.Spin(None, key='-DATAHEADx-', expand_x = True), sg.Spin(None, key='-DATAHEADy-', expand_x = True)],
+	Tab2 = sg.Tab('Data', [[sg.Frame('Data Form', [[sg.Spin(None, key='-DATAHEADx-', size=(45)), sg.Spin(None, key='-DATAHEADy-', size=(45))],
 	 [sg.Button('Submit', key='-DATASUBMIT-')]], expand_x = True)],
-		[sg.Frame('Data Visualization', [[sg.Canvas(size=(400,400), key='-DATACHART-')]])]
+		[sg.Frame('Data Visualization', [[sg.Canvas(size=(400,400), expand_x=True, expand_y=True, key='-DATACHART-')]], expand_x=True, expand_y=True)]
 	])
 	
 	layout = [[sg.Menu(Menu, key='-MENU-')],
@@ -56,8 +55,13 @@ except FileNotFoundError:
 while True:
 	events, values = window.read()
 
-	if events in ['-1-', '-2-', '-3-']:
-		pass
+	if events == '-TABLESUBMIT-' and values['-FIELD-'] != "":
+		if values['-TABLEINPUT-'] != "" or " ":
+			try:
+				newDF = pd.DataFrame(df.loc[df[values['-FIELD-']] == int(values['-TABLEINPUT-'])])
+			except ValueError:
+				newDF = pd.DataFrame(df.loc[df[values['-FIELD-']] == values['-TABLEINPUT-']])
+			sg.Popup("\n".join(map(str, newDF.values.tolist())))
 
 	if events == 'Open':
 		filePath = sg.popup_get_file('Open', no_window=True)
@@ -71,6 +75,7 @@ while True:
 						newList.append(item)
 					window.close()
 					window = cWindow(themeLoad['Theme'])
+					window['-SEARCHFRAME-'].update(visible = True)
 					window.extend_layout(window['-TABLE-'], [[sg.Table(values=[], headings=[item for item in df], key='-TABLECONTENT-',
 						auto_size_columns=False, expand_x = True, expand_y = True, justification = "left")]])
 					window['-TABLECONTENT-'].update(newList)
@@ -92,9 +97,12 @@ while True:
 		window = cWindow(events)
 
 	if events == '-DATASUBMIT-':
-		create_plot(update_figure(df[values['-DATAHEADx-']].tolist(),
-			df[values['-DATAHEADy-']].tolist(), values['-DATAHEADx-'], 
-			values['-DATAHEADy-']))
+		try:
+			create_plot(update_figure(df[values['-DATAHEADx-']].tolist(),
+				df[values['-DATAHEADy-']].tolist(), values['-DATAHEADx-'], 
+				values['-DATAHEADy-']))
+		except Exception:
+			sg.Popup("Invalid")
 
 	if events in [sg.WIN_CLOSED, 'Exit']:
 		break
