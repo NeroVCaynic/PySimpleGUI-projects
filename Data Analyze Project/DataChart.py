@@ -49,7 +49,7 @@ def cWindow(theme='LightGrey1'):
 		[sg.TabGroup([[Tab1, Tab2]])]
 	]
 
-	return sg.Window('Data View & Visualizer', layout, icon='icon/dataic.ico', finalize=True)
+	return sg.Window('Data View & Visualizer', layout, finalize=True)
 
 try:
 	with open('Theme/Theme_Saves.json', 'r') as theme:
