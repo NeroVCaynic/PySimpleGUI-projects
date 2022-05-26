@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import os
+import sys
 from pathlib import Path as path
 import pandas as pd
 import json
@@ -135,3 +136,4 @@ while True:
 		break
 
 window.close()
+sys.exit()
